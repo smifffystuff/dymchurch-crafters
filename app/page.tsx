@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { mockProducts } from '@/data/mockData'
+import ProductCard from '@/components/ProductCard'
+import { fetchProducts } from '@/lib/api'
 
-// Get featured products
-const featuredProducts = mockProducts.filter(p => p.featured)
+export default async function HomePage() {
+  // Fetch featured products from MongoDB
+  const response = await fetchProducts({ featured: true })
+  const featuredProducts = response.success && response.data ? response.data : []
 
-export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
@@ -44,27 +46,21 @@ export default function HomePage() {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Featured Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <Link 
-                key={product.id}
-                href={`/products/${product.id}`}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group"
-              >
-                <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-400">Product Image</span>
-                </div>
-                <div className="p-4">
-                  <p className="text-sm text-gray-500 mb-1">{product.category}</p>
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2 group-hover:text-primary-600">
-                    {product.name}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-2">by {product.crafter}</p>
-                  <p className="text-xl font-bold text-primary-600">£{product.price.toFixed(2)}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          
+          {featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 mb-4">No featured products yet.</p>
+              <p className="text-sm text-gray-500">
+                Run <code className="bg-gray-100 px-2 py-1 rounded">npm run seed</code> to add sample data.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.slice(0, 4).map((product: any) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

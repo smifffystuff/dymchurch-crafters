@@ -2,9 +2,13 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
-import { mockProducts } from '@/data/mockData'
+import { fetchProducts } from '@/lib/api'
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  // Fetch all products from MongoDB
+  const response = await fetchProducts()
+  const products = response.success && response.data ? response.data : []
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Header />
@@ -33,9 +37,18 @@ export default function ProductsPage() {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {products.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-600 mb-4">No products found.</p>
+              <p className="text-sm text-gray-500">
+                Run <code className="bg-gray-100 px-2 py-1 rounded">npm run seed</code> to add sample data.
+              </p>
+            </div>
+          ) : (
+            products.map((product: any) => (
+              <ProductCard key={product._id} product={product} />
+            ))
+          )}
         </div>
       </div>
 

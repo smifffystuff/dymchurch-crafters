@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import { mockProducts } from '@/data/mockData'
+import { fetchProduct } from '@/lib/api'
 
 interface ProductPageProps {
   params: {
@@ -15,10 +15,44 @@ interface ProductPageProps {
 export default function ProductPage({ params }: ProductPageProps) {
   const [quantity, setQuantity] = useState(1)
   const [deliveryOption, setDeliveryOption] = useState('pickup')
+  const [product, setProduct] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    async function loadProduct() {
+      setLoading(true)
+      const response = await fetchProduct(params.id)
+      
+      if (response.success && response.data) {
+        setProduct(response.data)
+        setError(false)
+      } else {
+        setError(true)
+      }
+      
+      setLoading(false)
+    }
+
+    loadProduct()
+  }, [params.id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading product...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
   
-  const product = mockProducts.find(p => p.id === parseInt(params.id))
-  
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Header />
@@ -39,6 +73,8 @@ export default function ProductPage({ params }: ProductPageProps) {
   const handleAddToCart = () => {
     alert(`Added ${quantity} x ${product.name} to cart!\nDelivery: ${deliveryOption}`)
   }
+
+  const crafterInfo = typeof product.crafterId === 'object' ? product.crafterId : null
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -85,7 +121,16 @@ export default function ProductPage({ params }: ProductPageProps) {
               <ul className="space-y-2 text-gray-700">
                 <li><span className="font-medium">Materials:</span> {product.materials}</li>
                 {product.dimensions && <li><span className="font-medium">Dimensions:</span> {product.dimensions}</li>}
-                <li><span className="font-medium">Made by:</span> <Link href={`/crafters/${product.crafterId}`} className="text-primary-600 hover:underline">{product.crafter}</Link></li>
+                <li>
+                  <span className="font-medium">Made by:</span>{' '}
+                  {crafterInfo ? (
+                    <Link href={`/crafters/${crafterInfo._id}`} className="text-primary-600 hover:underline">
+                      {crafterInfo.name}
+                    </Link>
+                  ) : (
+                    <span>{product.crafter}</span>
+                  )}
+                </li>
                 <li><span className="font-medium">Availability:</span> <span className={product.inStock ? "text-green-600" : "text-red-600"}>{product.inStock ? "In Stock" : "Out of Stock"}</span></li>
               </ul>
             </div>
