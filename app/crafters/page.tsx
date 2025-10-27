@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { fetchCrafters } from '@/lib/api'
@@ -37,8 +38,18 @@ export default async function CraftersPage() {
               >
                 <div className="p-6">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-3xl">👤</span>
+                    <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                      {crafter.profileImage ? (
+                        <Image
+                          src={crafter.profileImage}
+                          alt={crafter.name}
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                        />
+                      ) : (
+                        <span className="text-3xl">👤</span>
+                      )}
                     </div>
                     <div className="flex-1">
                       <h3 className="text-2xl font-bold text-gray-900 mb-1 group-hover:text-primary-600">
