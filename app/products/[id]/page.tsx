@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState, useEffect, use } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -94,8 +95,19 @@ export default function ProductPage({ params }: ProductPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div>
-            <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-              <span className="text-gray-400 text-xl">Product Image</span>
+            <div className="aspect-square bg-gray-200 rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
+              {product.images && product.images.length > 0 ? (
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              ) : (
+                <span className="text-gray-400 text-xl">Product Image</span>
+              )}
             </div>
             <div className="grid grid-cols-4 gap-2">
               {[1, 2, 3, 4].map((i) => (

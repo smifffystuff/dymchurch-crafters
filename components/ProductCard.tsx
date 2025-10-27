@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Product } from '@/types'
 
 interface ProductCardProps {
@@ -11,10 +12,20 @@ export default function ProductCard({ product }: ProductCardProps) {
       href={`/products/${product._id}`}
       className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group"
     >
-      <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative">
-        <span className="text-gray-400 text-sm">Product Image</span>
+      <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center relative overflow-hidden">
+        {product.images && product.images.length > 0 ? (
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <span className="text-gray-400 text-sm">Product Image</span>
+        )}
         {product.featured && (
-          <div className="absolute top-2 right-2 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+          <div className="absolute top-2 right-2 bg-primary-600 text-white px-3 py-1 rounded-full text-xs font-semibold z-10">
             Featured
           </div>
         )}

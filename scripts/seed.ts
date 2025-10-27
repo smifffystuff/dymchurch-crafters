@@ -107,7 +107,7 @@ async function seed() {
         dimensions: '180cm x 25cm',
         inStock: true,
         featured: true,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=800&q=80'],
       },
       {
         name: 'Ceramic Coffee Mug',
@@ -120,7 +120,7 @@ async function seed() {
         dimensions: '10cm height, 350ml capacity',
         inStock: true,
         featured: true,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=800&q=80'],
       },
       {
         name: 'Handmade Wooden Bowl',
@@ -133,7 +133,7 @@ async function seed() {
         dimensions: '25cm diameter, 8cm depth',
         inStock: true,
         featured: true,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=800&q=80'],
       },
       {
         name: 'Sterling Silver Necklace',
@@ -146,7 +146,7 @@ async function seed() {
         dimensions: '45cm chain length',
         inStock: true,
         featured: true,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80'],
       },
       {
         name: 'Watercolor Landscape Print',
@@ -159,7 +159,7 @@ async function seed() {
         dimensions: 'A4 (21cm x 29.7cm)',
         inStock: true,
         featured: false,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80'],
       },
       {
         name: 'Leather Wallet',
@@ -172,7 +172,7 @@ async function seed() {
         dimensions: '11cm x 9cm',
         inStock: true,
         featured: false,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1627123424574-724758594e93?w=800&q=80'],
       },
       // Additional products
       {
@@ -186,7 +186,7 @@ async function seed() {
         dimensions: '80cm x 80cm',
         inStock: true,
         featured: false,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?w=800&q=80'],
       },
       {
         name: 'Ceramic Serving Platter',
@@ -199,7 +199,7 @@ async function seed() {
         dimensions: '35cm diameter',
         inStock: true,
         featured: false,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=800&q=80'],
       },
       {
         name: 'Wooden Cutting Board',
@@ -212,7 +212,7 @@ async function seed() {
         dimensions: '40cm x 25cm',
         inStock: true,
         featured: false,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?w=800&q=80'],
       },
       {
         name: 'Handmade Silver Earrings',
@@ -225,7 +225,7 @@ async function seed() {
         dimensions: '3cm length',
         inStock: true,
         featured: false,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=800&q=80'],
       },
       {
         name: 'Coastal Scene Watercolor',
@@ -238,7 +238,7 @@ async function seed() {
         dimensions: 'A3 (30cm x 42cm)',
         inStock: true,
         featured: true,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80'],
       },
       {
         name: 'Leather Messenger Bag',
@@ -251,7 +251,7 @@ async function seed() {
         dimensions: '38cm x 28cm x 10cm',
         inStock: true,
         featured: true,
-        images: [],
+        images: ['https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800&q=80'],
       },
     ]
 
