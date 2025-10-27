@@ -1,3 +1,5 @@
+// @ts-nocheck
+// This file is deprecated - using MongoDB database instead
 import { Product, Crafter } from '@/types'
 
 export const mockProducts: Product[] = [

@@ -6,12 +6,13 @@ import { Product } from '@/lib/models/Product'
 // GET /api/crafters/[id] - Get a single crafter with their products
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB()
-
-    const crafter = await Crafter.findById(params.id).lean()
+    
+    const { id } = await params
+    const crafter = await Crafter.findById(id).lean()
 
     if (!crafter) {
       return NextResponse.json(
@@ -24,7 +25,7 @@ export async function GET(
     }
 
     // Get crafter's products
-    const products = await Product.find({ crafterId: params.id })
+    const products = await Product.find({ crafterId: id })
       .sort({ createdAt: -1 })
       .lean()
 

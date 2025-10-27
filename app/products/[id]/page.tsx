@@ -1,18 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { fetchProduct } from '@/lib/api'
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
+  const { id } = use(params)
   const [quantity, setQuantity] = useState(1)
   const [deliveryOption, setDeliveryOption] = useState('pickup')
   const [product, setProduct] = useState<any>(null)
@@ -22,7 +23,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   useEffect(() => {
     async function loadProduct() {
       setLoading(true)
-      const response = await fetchProduct(params.id)
+      const response = await fetchProduct(id)
       
       if (response.success && response.data) {
         setProduct(response.data)
@@ -35,7 +36,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     }
 
     loadProduct()
-  }, [params.id])
+  }, [id])
 
   if (loading) {
     return (
