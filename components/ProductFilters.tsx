@@ -7,8 +7,10 @@ interface ProductFiltersProps {
   onFilterChange: (filters: FilterState) => void
   onSemanticSearch?: (query: string) => void
   crafters: Array<{ _id: string; name: string }>
+  categories?: Array<{ _id: string; name: string; slug: string }> // Make categories dynamic
   totalProducts: number
   filteredCount: number
+  hideCategory?: boolean // Optional: hide category filter when on category page
 }
 
 export interface FilterState {
@@ -20,16 +22,6 @@ export interface FilterState {
   sortBy: string
   useSemanticSearch: boolean
 }
-
-const CATEGORIES = [
-  { value: 'all', label: 'All Categories' },
-  { value: 'Jewelry', label: 'Jewelry' },
-  { value: 'Pottery', label: 'Pottery' },
-  { value: 'Textiles', label: 'Textiles' },
-  { value: 'Woodwork', label: 'Woodwork' },
-  { value: 'Art', label: 'Art' },
-  { value: 'Other', label: 'Other' },
-]
 
 const SORT_OPTIONS = [
   { value: 'relevance', label: 'Relevance', semanticOnly: true },
@@ -43,8 +35,10 @@ export default function ProductFilters({
   onFilterChange,
   onSemanticSearch,
   crafters,
+  categories = [], // Default to empty array
   totalProducts,
   filteredCount,
+  hideCategory = false,
 }: ProductFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
@@ -229,19 +223,22 @@ export default function ProductFilters({
         </div>
 
         {/* Filter Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Category Filter */}
-          <select
-            value={filters.category}
-            onChange={(e) => updateFilter('category', e.target.value)}
-            className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat.value} value={cat.value}>
-                {cat.label}
-              </option>
-            ))}
-          </select>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${hideCategory ? 'lg:grid-cols-4' : 'lg:grid-cols-5'} gap-4`}>
+          {/* Category Filter - Hidden when on category page */}
+          {!hideCategory && (
+            <select
+              value={filters.category}
+              onChange={(e) => updateFilter('category', e.target.value)}
+              className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="all">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          )}
 
           {/* Crafter Filter */}
           <select

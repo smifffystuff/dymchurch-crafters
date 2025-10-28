@@ -110,7 +110,7 @@ export default async function CrafterPage({ params }: CrafterPageProps) {
               No Products Yet
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              This crafter hasn't listed any products yet. Check back soon!
+              This crafter hasn&apos;t listed any products yet. Check back soon!
             </p>
             <Link
               href="/products"

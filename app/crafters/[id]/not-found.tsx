@@ -9,7 +9,7 @@ export default function NotFound() {
           Crafter Not Found
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-          We couldn't find the crafter you're looking for.
+          We couldn&apos;t find the crafter you&apos;re looking for.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
