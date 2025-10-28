@@ -14,6 +14,7 @@ export async function GET(
     const { id } = await params
     const product = await Product.findById(id)
       .populate('crafterId', 'name specialty location email')
+      .select('-embedding') // Exclude large embedding field from response
       .lean()
 
     if (!product) {

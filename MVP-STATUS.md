@@ -132,12 +132,19 @@ Visit: http://localhost:3000
 
 ### ✅ Recently Completed
 - [x] **Individual Crafter Profile Pages** - View full crafter profiles with all their products
-- [x] **Product Search & Filtering** - Comprehensive search and filtering system ⭐ NEW!
+- [x] **Product Search & Filtering** - Comprehensive search and filtering system
   - Text search across products
   - Category, crafter, and price filters
   - Multiple sort options
   - Real-time updates
   - Mobile-responsive design
+  - Debounced search (performance optimized)
+- [x] **Semantic Search with AI** - OpenAI-powered natural language search ⭐ NEW!
+  - OpenAI embeddings integration
+  - MongoDB Atlas Vector Search
+  - Smart Search UI toggle
+  - Natural language queries
+  - Hybrid search (AI + filters)
 
 ### Phase 2 - Enhanced Browsing
 - [x] ~~Product Search & Filtering~~ ✅ COMPLETED!

@@ -75,6 +75,7 @@ export async function GET(request: Request) {
 
     const products = await Product.find(query)
       .populate('crafterId', 'name specialty location')
+      .select('-embedding') // Exclude large embedding field from response
       .sort(sortOptions)
       .lean()
 

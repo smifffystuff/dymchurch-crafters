@@ -22,7 +22,65 @@ export default function ProductsClient({
     setIsLoading(true)
 
     try {
-      // Build query parameters
+      // If semantic search is enabled and there's a search query, use semantic search
+      if (filters.useSemanticSearch && filters.search) {
+        const response = await fetch('/api/search/semantic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: filters.search,
+            limit: 50,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (data.success) {
+          // Apply client-side filters to semantic search results
+          let results = data.data
+
+          // Filter by category
+          if (filters.category && filters.category !== 'all') {
+            results = results.filter((p: any) => p.category === filters.category)
+          }
+
+          // Filter by crafter
+          if (filters.crafterId) {
+            results = results.filter((p: any) => p.crafterId._id === filters.crafterId)
+          }
+
+          // Filter by price
+          if (filters.minPrice) {
+            results = results.filter((p: any) => p.price >= parseFloat(filters.minPrice))
+          }
+          if (filters.maxPrice) {
+            results = results.filter((p: any) => p.price <= parseFloat(filters.maxPrice))
+          }
+
+          // Sort results - 'relevance' keeps vector search order (already sorted by score)
+          if (filters.sortBy && filters.sortBy !== 'newest' && filters.sortBy !== 'relevance') {
+            results.sort((a: any, b: any) => {
+              switch (filters.sortBy) {
+                case 'price-asc':
+                  return a.price - b.price
+                case 'price-desc':
+                  return b.price - a.price
+                case 'name-asc':
+                  return a.name.localeCompare(b.name)
+                default:
+                  return 0
+              }
+            })
+          }
+
+          setProducts(results)
+          return
+        }
+      }
+
+      // Otherwise use traditional search
       const params = new URLSearchParams()
 
       if (filters.search) {

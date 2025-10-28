@@ -15,6 +15,7 @@ export interface IProduct extends Document {
   inStock: boolean
   featured: boolean
   images: string[]
+  embedding?: number[] // OpenAI vector embedding for semantic search
   createdAt: Date
   updatedAt: Date
 }
@@ -71,6 +72,12 @@ const ProductSchema = new Schema<IProduct>(
     images: {
       type: [String],
       default: [],
+    },
+    embedding: {
+      type: [Number],
+      required: false,
+      // Note: This is a large field (1536 numbers), but we need it to be settable
+      // We'll explicitly exclude it in queries where we don't need it
     },
   },
   {
