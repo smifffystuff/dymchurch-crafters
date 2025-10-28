@@ -1,50 +1,26 @@
-import Link from 'next/link'
-import ProductCard from '@/components/ProductCard'
-import { fetchProducts } from '@/lib/api'
+import ProductsClient from './ProductsClient'
+import { fetchProducts, fetchCrafters } from '@/lib/api'
+
+export const metadata = {
+  title: 'All Products | Dymchurch Crafters',
+  description: 'Browse handmade crafts from local artisans in Dymchurch, Hythe, and Romney Marsh',
+}
 
 export default async function ProductsPage() {
-  // Fetch all products from MongoDB
-  const response = await fetchProducts()
-  const products = response.success && response.data ? response.data : []
+  // Fetch initial data on the server
+  const [productsResponse, craftersResponse] = await Promise.all([
+    fetchProducts(),
+    fetchCrafters(),
+  ])
+
+  const initialProducts = productsResponse.success && productsResponse.data ? productsResponse.data : []
+  const crafters = craftersResponse.success && craftersResponse.data ? craftersResponse.data : []
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">All Products</h1>
-      
-      {/* Filters */}
-      <div className="mb-8 flex flex-wrap gap-4">
-        <select className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-4 py-2">
-          <option>All Categories</option>
-          <option>Jewelry</option>
-          <option>Pottery</option>
-          <option>Textiles</option>
-          <option>Woodwork</option>
-          <option>Art</option>
-          <option>Other</option>
-        </select>
-        <select className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 rounded-lg px-4 py-2">
-          <option>Sort by: Featured</option>
-          <option>Price: Low to High</option>
-          <option>Price: High to Low</option>
-          <option>Newest First</option>
-        </select>
-      </div>
-
-      {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">No products found.</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
-              Run <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">npm run seed</code> to add sample data.
-            </p>
-          </div>
-        ) : (
-          products.map((product: any) => (
-            <ProductCard key={product._id} product={product} />
-          ))
-        )}
-      </div>
-    </div>
+    <ProductsClient
+      initialProducts={initialProducts}
+      crafters={crafters}
+    />
   )
 }
+

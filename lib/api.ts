@@ -13,6 +13,11 @@ export interface ApiResponse<T> {
 export async function fetchProducts(params?: {
   category?: string
   featured?: boolean
+  search?: string
+  minPrice?: number
+  maxPrice?: number
+  crafterId?: string
+  sortBy?: string
 }): Promise<ApiResponse<any[]>> {
   try {
     const searchParams = new URLSearchParams()
@@ -23,6 +28,26 @@ export async function fetchProducts(params?: {
     
     if (params?.featured) {
       searchParams.append('featured', 'true')
+    }
+
+    if (params?.search) {
+      searchParams.append('search', params.search)
+    }
+
+    if (params?.minPrice !== undefined) {
+      searchParams.append('minPrice', params.minPrice.toString())
+    }
+
+    if (params?.maxPrice !== undefined) {
+      searchParams.append('maxPrice', params.maxPrice.toString())
+    }
+
+    if (params?.crafterId) {
+      searchParams.append('crafterId', params.crafterId)
+    }
+
+    if (params?.sortBy) {
+      searchParams.append('sortBy', params.sortBy)
     }
 
     const url = `${API_BASE_URL}/api/products${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
