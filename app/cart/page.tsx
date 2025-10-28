@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
 
 const mockCartItems = [
   {
@@ -49,11 +47,9 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Header cartItemCount={cartItems.length} />
-
+    <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">Shopping Cart</h1>
 
         {cartItems.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -162,8 +158,6 @@ export default function CartPage() {
           </div>
         )}
       </div>
-
-      <Footer />
-    </div>
+    </>
   )
 }

@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import Header from '@/components/Header'
+import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: 'Dymchurch Crafters Marketplace',
@@ -12,8 +15,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider>
+          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors">
+            <Header />
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
