@@ -71,6 +71,7 @@ The Dymchurch Crafters Marketplace is a local e-commerce platform designed to co
 
 #### User Management
 - **Authentication System (Clerk)**
+  - Annymous access for customers 
   - Secure sign-up and sign-in flows
   - Social login options (Google, Facebook, etc.)
   - Email/password authentication
@@ -85,6 +86,11 @@ The Dymchurch Crafters Marketplace is a local e-commerce platform designed to co
   - Contact information display options
   - Portfolio/gallery showcase
   - Verification status/badges
+
+- **Adminintrator Accounts**
+  - Approve products
+  - Approve new seller requests
+  - Monitor activity
 
 - **Customer Accounts**
   - Optional account creation for buyers

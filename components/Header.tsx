@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 import ThemeSwitch from './ThemeSwitch'
 
 interface HeaderProps {
@@ -10,6 +11,8 @@ interface HeaderProps {
 
 export default function Header({ cartItemCount = 0 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useUser()
+  const userRole = user?.unsafeMetadata?.role as string | undefined
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">
@@ -30,9 +33,40 @@ export default function Header({ cartItemCount = 0 }: HeaderProps) {
             <Link href="/crafters" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
               Crafters
             </Link>
+            
+            {/* Show Dashboard link for crafters and admins */}
+            <SignedIn>
+              {(userRole === 'crafter' || userRole === 'admin') && (
+                <Link href="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
+                  Dashboard
+                </Link>
+              )}
+              {userRole === 'admin' && (
+                <Link href="/admin" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
+                  Admin
+                </Link>
+              )}
+            </SignedIn>
+            
             <Link href="/cart" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
               Cart ({cartItemCount})
             </Link>
+            
+            {/* Auth Buttons */}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition">
+                  Sign In
+                </button>
+              </SignInButton>
+              <Link href="/sign-up" className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition">
+                Sign Up
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+            
             <ThemeSwitch />
           </div>
 
@@ -78,6 +112,29 @@ export default function Header({ cartItemCount = 0 }: HeaderProps) {
             >
               Crafters
             </Link>
+            
+            {/* Show Dashboard link for crafters and admins */}
+            <SignedIn>
+              {(userRole === 'crafter' || userRole === 'admin') && (
+                <Link 
+                  href="/dashboard" 
+                  className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              )}
+              {userRole === 'admin' && (
+                <Link 
+                  href="/admin" 
+                  className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Admin
+                </Link>
+              )}
+            </SignedIn>
+            
             <Link 
               href="/cart" 
               className="block py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
@@ -85,6 +142,24 @@ export default function Header({ cartItemCount = 0 }: HeaderProps) {
             >
               Cart ({cartItemCount})
             </Link>
+            
+            {/* Auth Buttons */}
+            <SignedOut>
+              <div className="pt-2 space-y-2">
+                <SignInButton mode="modal">
+                  <button className="block w-full text-left py-2 text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <Link 
+                  href="/sign-up" 
+                  className="block py-2 text-primary-600 dark:text-primary-400 font-semibold"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            </SignedOut>
           </div>
         )}
       </nav>

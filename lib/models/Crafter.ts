@@ -11,6 +11,9 @@ export interface ICrafter extends Document {
   profileImage?: string
   verified: boolean
   productsCount: number
+  userId?: mongoose.Types.ObjectId
+  contactEmail?: string
+  contactPhone?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -47,6 +50,19 @@ const CrafterSchema = new Schema<ICrafter>(
     },
     phone: {
       type: String,
+      required: false,
+    },
+    contactEmail: {
+      type: String,
+      required: false,
+    },
+    contactPhone: {
+      type: String,
+      required: false,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
       required: false,
     },
     profileImage: {
