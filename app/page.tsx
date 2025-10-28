@@ -1,11 +1,27 @@
 import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import { fetchProducts } from '@/lib/api'
+import connectDB from '@/lib/mongodb'
+import { Category } from '@/lib/models/Category'
 
 export default async function HomePage() {
   // Fetch featured products from MongoDB
   const response = await fetchProducts({ featured: true })
   const featuredProducts = response.success && response.data ? response.data : []
+
+  // Fetch categories from MongoDB
+  await connectDB()
+  const categories = await Category.find({ isActive: true })
+    .sort({ displayOrder: 1, name: 1 })
+    .select('name slug icon')
+    .lean()
+
+  const serializedCategories = categories.map((cat: any) => ({
+    _id: cat._id.toString(),
+    name: cat.name,
+    slug: cat.slug,
+    icon: cat.icon,
+  }))
 
   return (
     <>
@@ -64,16 +80,16 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">Shop by Category</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {['Jewelry', 'Pottery', 'Textiles', 'Woodwork', 'Art', 'Other'].map((category) => (
+            {serializedCategories.map((category) => (
               <Link
-                key={category}
-                href={`/categories/${category.toLowerCase()}`}
+                key={category._id}
+                href={`/categories/${category.slug}`}
                 className="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-6 text-center hover:bg-primary-100 dark:hover:bg-primary-900/50 transition"
               >
                 <div className="w-16 h-16 mx-auto mb-3 bg-primary-200 dark:bg-primary-800 rounded-full flex items-center justify-center">
-                  <span className="text-2xl">🎨</span>
+                  <span className="text-2xl">{category.icon}</span>
                 </div>
-                <p className="font-semibold text-gray-900 dark:text-gray-100">{category}</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-100">{category.name}</p>
               </Link>
             ))}
           </div>
