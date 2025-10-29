@@ -6,41 +6,38 @@ import connectDB from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { Crafter } from '@/lib/models/Crafter';
 
+// Helper function to transform Clerk user data to our User model format
+function transformUserData(userData: any) {
+  return {
+    clerkId: userData.id,
+    email: userData.email_addresses[0].email_address,
+    firstName: userData.first_name,
+    lastName: userData.last_name,
+    imageUrl: userData.image_url,
+    role: userData.unsafe_metadata?.role || 'customer',
+    onboardingComplete: userData.unsafe_metadata?.onboardingComplete || false,
+  };
+}
+
 // Handler for user.created event
 async function handleUserCreated(evt: WebhookEvent) {
-  const { id, email_addresses, first_name, last_name, image_url, unsafe_metadata } = evt.data as any;
-
-  await User.create({
-    clerkId: id,
-    email: email_addresses[0].email_address,
-    firstName: first_name,
-    lastName: last_name,
-    imageUrl: image_url,
-    role: unsafe_metadata?.role || 'customer',
-    onboardingComplete: unsafe_metadata?.onboardingComplete || false,
-  });
-
-  console.log('✅ User created in database:', id);
+  const userData = transformUserData(evt.data);
+  await User.create(userData);
+  console.log('✅ User created in database:', userData.clerkId);
 }
 
 // Handler for user.updated event
 async function handleUserUpdated(evt: WebhookEvent) {
-  const { id, email_addresses, first_name, last_name, image_url, unsafe_metadata } = evt.data as any;
-
+  const userData = transformUserData(evt.data);
+  const { clerkId, ...updateData } = userData;
+  
   await User.findOneAndUpdate(
-    { clerkId: id },
-    {
-      email: email_addresses[0].email_address,
-      firstName: first_name,
-      lastName: last_name,
-      imageUrl: image_url,
-      role: unsafe_metadata?.role,
-      onboardingComplete: unsafe_metadata?.onboardingComplete,
-    },
+    { clerkId },
+    updateData,
     { new: true, upsert: true }
   );
-
-  console.log('✅ User updated in database:', id);
+  
+  console.log('✅ User updated in database:', clerkId);
 }
 
 // Handler for user.deleted event
