@@ -38,10 +38,10 @@ export async function GET(request: Request) {
     if (minPrice || maxPrice) {
       query.price = {}
       if (minPrice) {
-        query.price.$gte = parseFloat(minPrice)
+        query.price.$gte = Number.parseFloat(minPrice)
       }
       if (maxPrice) {
-        query.price.$lte = parseFloat(maxPrice)
+        query.price.$lte = Number.parseFloat(maxPrice)
       }
     }
 

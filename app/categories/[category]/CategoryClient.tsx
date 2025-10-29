@@ -60,10 +60,10 @@ export default function CategoryClient({
 
           // Filter by price
           if (filters.minPrice) {
-            results = results.filter((p: any) => p.price >= parseFloat(filters.minPrice))
+            results = results.filter((p: any) => p.price >= Number.parseFloat(filters.minPrice))
           }
           if (filters.maxPrice) {
-            results = results.filter((p: any) => p.price <= parseFloat(filters.maxPrice))
+            results = results.filter((p: any) => p.price <= Number.parseFloat(filters.maxPrice))
           }
 
           // Sort results - 'relevance' keeps vector search order (already sorted by score)
