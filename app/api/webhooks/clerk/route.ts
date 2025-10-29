@@ -6,6 +6,72 @@ import connectDB from '@/lib/mongodb';
 import User from '@/lib/models/User';
 import { Crafter } from '@/lib/models/Crafter';
 
+// Handler for user.created event
+async function handleUserCreated(evt: WebhookEvent) {
+  const { id, email_addresses, first_name, last_name, image_url, unsafe_metadata } = evt.data as any;
+
+  await User.create({
+    clerkId: id,
+    email: email_addresses[0].email_address,
+    firstName: first_name,
+    lastName: last_name,
+    imageUrl: image_url,
+    role: unsafe_metadata?.role || 'customer',
+    onboardingComplete: unsafe_metadata?.onboardingComplete || false,
+  });
+
+  console.log('✅ User created in database:', id);
+}
+
+// Handler for user.updated event
+async function handleUserUpdated(evt: WebhookEvent) {
+  const { id, email_addresses, first_name, last_name, image_url, unsafe_metadata } = evt.data as any;
+
+  await User.findOneAndUpdate(
+    { clerkId: id },
+    {
+      email: email_addresses[0].email_address,
+      firstName: first_name,
+      lastName: last_name,
+      imageUrl: image_url,
+      role: unsafe_metadata?.role,
+      onboardingComplete: unsafe_metadata?.onboardingComplete,
+    },
+    { new: true, upsert: true }
+  );
+
+  console.log('✅ User updated in database:', id);
+}
+
+// Handler for user.deleted event
+async function handleUserDeleted(evt: WebhookEvent) {
+  const { id } = evt.data as any;
+
+  console.log('🗑️  Attempting to delete user from database:', id);
+  console.log('Event data:', JSON.stringify(evt.data, null, 2));
+  
+  // Find the user first to check if they have a crafter profile
+  const user = await User.findOne({ clerkId: id });
+  
+  if (!user) {
+    console.log('⚠️  User not found in database:', id);
+    return;
+  }
+
+  console.log('✅ Found user in database:', user.email);
+  
+  // If user has a crafter profile, delete that too
+  if (user.crafterId) {
+    console.log('🗑️  Deleting associated crafter profile:', user.crafterId);
+    await Crafter.findByIdAndDelete(user.crafterId);
+    console.log('✅ Crafter profile deleted');
+  }
+  
+  // Delete the user
+  await User.findOneAndDelete({ clerkId: id });
+  console.log('✅ User deleted from database:', id, user.email);
+}
+
 export async function POST(req: Request) {
   // Get the headers
   const headerPayload = await headers();
@@ -55,65 +121,19 @@ export async function POST(req: Request) {
   try {
     await connectDB();
 
-    if (eventType === 'user.created') {
-      const { id, email_addresses, first_name, last_name, image_url, unsafe_metadata } = evt.data;
-
-      await User.create({
-        clerkId: id,
-        email: email_addresses[0].email_address,
-        firstName: first_name,
-        lastName: last_name,
-        imageUrl: image_url,
-        role: unsafe_metadata?.role || 'customer',
-        onboardingComplete: unsafe_metadata?.onboardingComplete || false,
-      });
-
-      console.log('✅ User created in database:', id);
-    }
-
-    if (eventType === 'user.updated') {
-      const { id, email_addresses, first_name, last_name, image_url, unsafe_metadata } = evt.data;
-
-      await User.findOneAndUpdate(
-        { clerkId: id },
-        {
-          email: email_addresses[0].email_address,
-          firstName: first_name,
-          lastName: last_name,
-          imageUrl: image_url,
-          role: unsafe_metadata?.role,
-          onboardingComplete: unsafe_metadata?.onboardingComplete,
-        },
-        { new: true, upsert: true }
-      );
-
-      console.log('✅ User updated in database:', id);
-    }
-
-    if (eventType === 'user.deleted') {
-      const { id } = evt.data;
-
-      console.log('🗑️  Attempting to delete user from database:', id);
-      console.log('Event data:', JSON.stringify(evt.data, null, 2));
-      
-      // Find the user first to check if they have a crafter profile
-      const user = await User.findOne({ clerkId: id });
-      
-      if (user) {
-        console.log('✅ Found user in database:', user.email);
-        // If user has a crafter profile, delete that too
-        if (user.crafterId) {
-          console.log('🗑️  Deleting associated crafter profile:', user.crafterId);
-          await Crafter.findByIdAndDelete(user.crafterId);
-          console.log('✅ Crafter profile deleted');
-        }
-        
-        // Delete the user
-        await User.findOneAndDelete({ clerkId: id });
-        console.log('✅ User deleted from database:', id, user.email);
-      } else {
-        console.log('⚠️  User not found in database:', id);
-      }
+    // Route to appropriate handler based on event type
+    switch (eventType) {
+      case 'user.created':
+        await handleUserCreated(evt);
+        break;
+      case 'user.updated':
+        await handleUserUpdated(evt);
+        break;
+      case 'user.deleted':
+        await handleUserDeleted(evt);
+        break;
+      default:
+        console.log('⚠️  Unhandled event type:', eventType);
     }
 
     return NextResponse.json({ success: true }, { status: 200 });
