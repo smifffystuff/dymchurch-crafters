@@ -5,7 +5,7 @@ import Link from 'next/link'
 import ProductCard from '@/components/ProductCard'
 import ProductFilters, { FilterState } from '@/components/ProductFilters'
 import { Loader2, ChevronRight, Home } from 'lucide-react'
-import { performSemanticSearch, applyProductFilters, sortProducts } from '@/lib/productFilters'
+import { performSemanticSearch } from '@/lib/productFilters'
 
 interface CategoryClientProps {
   category: string
