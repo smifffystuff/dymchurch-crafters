@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     }
 
     // Determine sort order
-    let sortOptions: any = { createdAt: -1 } // Default: newest first
+    let sortOptions: any
     
     switch (sortBy) {
       case 'price-asc':
