@@ -22,7 +22,7 @@ export async function POST(
 
     // Check if user is admin
     const user = await User.findOne({ clerkId: userId });
-    if (!user || user.role !== 'admin') {
+    if (user?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
