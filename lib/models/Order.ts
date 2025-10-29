@@ -17,15 +17,17 @@ export interface IOrder extends Document {
   subtotal: number
   deliveryFee: number
   total: number
-  deliveryOption: 'pickup' | 'delivery' | 'shipping'
+  deliveryOption: 'pickup' | 'local-delivery' | 'delivery' | 'shipping'
   deliveryAddress?: {
     street: string
     city: string
     postcode: string
   }
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-  paymentStatus: 'pending' | 'paid' | 'refunded'
+  paymentStatus: 'pending' | 'paid' | 'refunded' | 'failed'
   paymentIntentId?: string
+  stripeChargeId?: string
+  paidAt?: Date
   notes?: string
   createdAt: Date
   updatedAt: Date
@@ -36,7 +38,7 @@ const OrderSchema = new Schema<IOrder>(
   {
     orderNumber: {
       type: String,
-      required: true,
+      required: false, // Will be auto-generated
       unique: true,
     },
     customerId: {
@@ -98,7 +100,7 @@ const OrderSchema = new Schema<IOrder>(
     },
     deliveryOption: {
       type: String,
-      enum: ['pickup', 'delivery', 'shipping'],
+      enum: ['pickup', 'local-delivery', 'delivery', 'shipping'],
       required: true,
     },
     deliveryAddress: {
@@ -113,11 +115,20 @@ const OrderSchema = new Schema<IOrder>(
     },
     paymentStatus: {
       type: String,
-      enum: ['pending', 'paid', 'refunded'],
+      enum: ['pending', 'paid', 'refunded', 'failed'],
       default: 'pending',
     },
     paymentIntentId: {
       type: String,
+      required: false,
+      index: true,
+    },
+    stripeChargeId: {
+      type: String,
+      required: false,
+    },
+    paidAt: {
+      type: Date,
       required: false,
     },
     notes: {
@@ -136,6 +147,34 @@ OrderSchema.index({ customerId: 1 })
 OrderSchema.index({ customerEmail: 1 })
 OrderSchema.index({ status: 1 })
 OrderSchema.index({ createdAt: -1 })
+
+// Pre-save hook to generate order number
+OrderSchema.pre('save', async function(next) {
+  if (!this.orderNumber) {
+    // Format: ORD-YYYYMMDD-XXXX (e.g., ORD-20251029-0001)
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    
+    // Use a more reliable method to get the next sequential number
+    // Find the highest order number for today
+    const todayPattern = new RegExp(`^ORD-${dateStr}-`);
+    const lastOrder = await (this.constructor as Model<IOrder>)
+      .findOne({ orderNumber: todayPattern })
+      .sort({ orderNumber: -1 })
+      .select('orderNumber')
+      .lean();
+    
+    let sequential = 1;
+    if (lastOrder && lastOrder.orderNumber) {
+      // Extract the sequential part and increment
+      const lastSequential = parseInt(lastOrder.orderNumber.split('-')[2]);
+      sequential = lastSequential + 1;
+    }
+    
+    this.orderNumber = `ORD-${dateStr}-${String(sequential).padStart(4, '0')}`;
+  }
+  next();
+});
 
 // Export model
 export const Order: Model<IOrder> =

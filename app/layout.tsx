@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { ClerkProvider } from '@clerk/nextjs'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { CartProvider } from '@/contexts/CartContext'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
@@ -20,13 +21,15 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body>
           <ThemeProvider>
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors">
-              <Header />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-            </div>
+            <CartProvider>
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col transition-colors">
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            </CartProvider>
           </ThemeProvider>
         </body>
       </html>

@@ -4,15 +4,14 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs'
 import ThemeSwitch from './ThemeSwitch'
+import { useCart } from '@/contexts/CartContext'
 
-interface HeaderProps {
-  cartItemCount?: number
-}
-
-export default function Header({ cartItemCount = 0 }: HeaderProps) {
+export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user } = useUser()
   const userRole = user?.unsafeMetadata?.role as string | undefined
+  const { getTotalItems } = useCart()
+  const cartItemCount = getTotalItems()
 
   return (
     <header className="bg-white dark:bg-gray-900 shadow-sm sticky top-0 z-50 transition-colors">

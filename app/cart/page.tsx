@@ -2,48 +2,83 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-
-const mockCartItems = [
-  {
-    id: 1,
-    productId: 1,
-    name: 'Hand-Knitted Scarf',
-    price: 25.00,
-    quantity: 1,
-    crafter: 'Sarah Thompson',
-    deliveryOption: 'pickup' as const
-  },
-  {
-    id: 2,
-    productId: 2,
-    name: 'Ceramic Coffee Mug',
-    price: 18.50,
-    quantity: 2,
-    crafter: 'Michael Potter',
-    deliveryOption: 'delivery' as const
-  }
-]
+import { useRouter } from 'next/navigation'
+import { useCart } from '@/contexts/CartContext'
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(mockCartItems)
+  const router = useRouter()
+  const { items: cartItems, updateQuantity, removeItem } = useCart()
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'local-delivery' | 'shipping'>('pickup')
+  const [customerName, setCustomerName] = useState('')
+  const [customerEmail, setCustomerEmail] = useState('')
+  const [showCheckoutForm, setShowCheckoutForm] = useState(false)
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity < 1) return
-    setCartItems(cartItems.map(item => 
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    ))
+  const updateItemQuantity = (productId: string, newQuantity: number) => {
+    updateQuantity(productId, newQuantity)
   }
 
-  const removeItem = (id: number) => {
-    setCartItems(cartItems.filter(item => item.id !== id))
+  const removeCartItem = (productId: string) => {
+    removeItem(productId)
   }
 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const deliveryFee = cartItems.some(item => item.deliveryOption === 'delivery') ? 3.50 : 0
+  
+  const getDeliveryFee = () => {
+    switch (deliveryMethod) {
+      case 'pickup':
+        return 0
+      case 'local-delivery':
+        return 3.50
+      case 'shipping':
+        return 5.95
+      default:
+        return 0
+    }
+  }
+  
+  const deliveryFee = getDeliveryFee()
   const total = subtotal + deliveryFee
 
   const handleCheckout = () => {
-    alert('Proceeding to checkout...\n\nThis is a simulated payment. In production, this would integrate with Stripe for secure payment processing.')
+    setShowCheckoutForm(true)
+  }
+
+  const handleProceedToPayment = () => {
+    // Validate form
+    if (!customerName || !customerEmail) {
+      alert('Please enter your name and email')
+      return
+    }
+
+    if (!customerEmail.includes('@')) {
+      alert('Please enter a valid email address')
+      return
+    }
+
+    // Prepare cart data for checkout
+    const cartData = cartItems.map(item => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      crafterName: item.crafter,
+    }))
+
+    const deliveryInfo = {
+      method: deliveryMethod,
+      fee: deliveryFee,
+    }
+
+    const customerInfo = {
+      name: customerName,
+      email: customerEmail,
+    }
+
+    // Store in localStorage for checkout page to access
+    localStorage.setItem('cart', JSON.stringify(cartData))
+    localStorage.setItem('deliveryInfo', JSON.stringify(deliveryInfo))
+    localStorage.setItem('customerInfo', JSON.stringify(customerInfo))
+
+    // Navigate to checkout
+    router.push('/checkout')
   }
 
   return (
@@ -66,7 +101,7 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-4">
               {cartItems.map((item) => (
-                <div key={item.id} className="bg-white rounded-lg shadow-md p-6">
+                <div key={item.productId} className="bg-white rounded-lg shadow-md p-6">
                   <div className="flex gap-6">
                     <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
                       <span className="text-gray-400 text-xs">Image</span>
@@ -78,27 +113,24 @@ export default function CartPage() {
                         </Link>
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">by {item.crafter}</p>
-                      <p className="text-sm text-gray-500 mb-3">
-                        Delivery: {item.deliveryOption === 'pickup' ? 'Local Pickup' : 'Local Delivery'}
-                      </p>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center border border-gray-300 rounded-lg">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => updateItemQuantity(item.productId, item.quantity - 1)}
                             className="px-3 py-1 hover:bg-gray-100"
                           >
                             -
                           </button>
                           <span className="px-4 py-1 border-x border-gray-300">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => updateItemQuantity(item.productId, item.quantity + 1)}
                             className="px-3 py-1 hover:bg-gray-100"
                           >
                             +
                           </button>
                         </div>
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeCartItem(item.productId)}
                           className="text-red-600 hover:text-red-800 text-sm font-medium"
                         >
                           Remove
@@ -114,6 +146,108 @@ export default function CartPage() {
                   </div>
                 </div>
               ))}
+
+              {/* Checkout Form */}
+              {showCheckoutForm && (
+                <div className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Checkout Details</h2>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder="John Smith"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        placeholder="john@example.com"
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        We'll send your order confirmation here
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Delivery Method *
+                      </label>
+                      <div className="space-y-2">
+                        <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="radio"
+                            name="delivery"
+                            value="pickup"
+                            checked={deliveryMethod === 'pickup'}
+                            onChange={(e) => setDeliveryMethod(e.target.value as any)}
+                            className="mr-3"
+                          />
+                          <div className="flex-1">
+                            <span className="font-medium">Local Pickup</span>
+                            <p className="text-sm text-gray-600">Free - Collect from crafter</p>
+                          </div>
+                          <span className="font-semibold">Free</span>
+                        </label>
+
+                        <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="radio"
+                            name="delivery"
+                            value="local-delivery"
+                            checked={deliveryMethod === 'local-delivery'}
+                            onChange={(e) => setDeliveryMethod(e.target.value as any)}
+                            className="mr-3"
+                          />
+                          <div className="flex-1">
+                            <span className="font-medium">Local Delivery</span>
+                            <p className="text-sm text-gray-600">Within Dymchurch area</p>
+                          </div>
+                          <span className="font-semibold">£3.50</span>
+                        </label>
+
+                        <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="radio"
+                            name="delivery"
+                            value="shipping"
+                            checked={deliveryMethod === 'shipping'}
+                            onChange={(e) => setDeliveryMethod(e.target.value as any)}
+                            className="mr-3"
+                          />
+                          <div className="flex-1">
+                            <span className="font-medium">UK Shipping</span>
+                            <p className="text-sm text-gray-600">Royal Mail</p>
+                          </div>
+                          <span className="font-semibold">£5.95</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleProceedToPayment}
+                      className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition"
+                    >
+                      Proceed to Payment
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Order Summary */}
@@ -134,23 +268,34 @@ export default function CartPage() {
                     <span>£{total.toFixed(2)}</span>
                   </div>
                 </div>
-                <button
-                  onClick={handleCheckout}
-                  className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition mb-3"
-                >
-                  Proceed to Checkout
-                </button>
-                <Link
-                  href="/products"
-                  className="block text-center text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Continue Shopping
-                </Link>
+                
+                {!showCheckoutForm ? (
+                  <>
+                    <button
+                      onClick={handleCheckout}
+                      className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary-700 transition mb-3"
+                    >
+                      Proceed to Checkout
+                    </button>
+                    <Link
+                      href="/products"
+                      className="block text-center text-primary-600 hover:text-primary-700 font-medium"
+                    >
+                      Continue Shopping
+                    </Link>
+                  </>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600">
+                      👈 Fill in your details to continue
+                    </p>
+                  </div>
+                )}
                 
                 <div className="mt-6 pt-6 border-t border-gray-200">
-                  <p className="text-sm text-gray-600 mb-2">💳 Simulated Payment</p>
+                  <p className="text-sm text-gray-600 mb-2">� Secure Checkout</p>
                   <p className="text-xs text-gray-500">
-                    Payment processing is simulated. Stripe integration will be added later.
+                    Powered by Stripe. Your payment information is encrypted and secure.
                   </p>
                 </div>
               </div>

@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect, use } from 'react'
 import { fetchProduct } from '@/lib/api'
+import { useCart } from '@/contexts/CartContext'
+import { useRouter } from 'next/navigation'
 
 interface ProductPageProps {
   params: Promise<{
@@ -13,11 +15,14 @@ interface ProductPageProps {
 
 export default function ProductPage({ params }: ProductPageProps) {
   const { id } = use(params)
+  const router = useRouter()
+  const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [deliveryOption, setDeliveryOption] = useState('pickup')
   const [product, setProduct] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
 
   useEffect(() => {
     async function loadProduct() {
@@ -63,7 +68,24 @@ export default function ProductPage({ params }: ProductPageProps) {
   }
 
   const handleAddToCart = () => {
-    alert(`Added ${quantity} x ${product.name} to cart!\nDelivery: ${deliveryOption}`)
+    const crafterInfo = typeof product.crafterId === 'object' ? product.crafterId : null
+    
+    // Add item(s) to cart based on quantity
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        productId: product._id,
+        name: product.name,
+        price: product.price,
+        crafter: crafterInfo ? crafterInfo.name : 'Unknown Crafter',
+        crafterId: crafterInfo ? crafterInfo._id : '',
+        image: product.images && product.images.length > 0 ? product.images[0] : undefined,
+        category: product.category,
+      })
+    }
+
+    // Show success message
+    setAddedToCart(true)
+    setTimeout(() => setAddedToCart(false), 3000)
   }
 
   const crafterInfo = typeof product.crafterId === 'object' ? product.crafterId : null
@@ -195,11 +217,35 @@ export default function ProductPage({ params }: ProductPageProps) {
               </div>
               <button
                 onClick={handleAddToCart}
-                className="flex-1 bg-primary-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-primary-700 transition"
+                disabled={!product.inStock}
+                className="flex-1 bg-primary-600 text-white py-3 px-8 rounded-lg font-semibold hover:bg-primary-700 transition disabled:bg-gray-300 disabled:cursor-not-allowed relative"
               >
-                Add to Cart
+                {addedToCart ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Added to Cart!
+                  </span>
+                ) : (
+                  'Add to Cart'
+                )}
               </button>
             </div>
+
+            {addedToCart && (
+              <div className="mb-4 flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-4">
+                <span className="text-green-800">
+                  ✓ {quantity} item{quantity > 1 ? 's' : ''} added to cart
+                </span>
+                <button
+                  onClick={() => router.push('/cart')}
+                  className="text-green-600 hover:text-green-700 font-semibold underline"
+                >
+                  View Cart
+                </button>
+              </div>
+            )}
 
             <button className="w-full bg-gray-900 text-white py-3 px-8 rounded-lg font-semibold hover:bg-gray-800 transition">
               Contact Crafter
