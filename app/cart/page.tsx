@@ -180,7 +180,7 @@ export default function CartPage() {
                         required
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        We'll send your order confirmation here
+                        We&apos;ll send your order confirmation here
                       </p>
                     </div>
 

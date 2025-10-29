@@ -4,12 +4,13 @@ import { Order } from '@/lib/models/Order';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
 
-    const order = await Order.findById(params.id).lean();
+    const { id } = await params;
+    const order = await Order.findById(id).lean();
 
     if (!order) {
       return NextResponse.json(

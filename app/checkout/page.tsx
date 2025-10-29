@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { useSearchParams } from 'next/navigation';
 import CheckoutForm from './CheckoutForm';
 
 // Load Stripe outside of component to avoid recreating on re-render
@@ -12,7 +11,6 @@ const stripePromise = loadStripe(
 );
 
 export default function CheckoutPage() {
-  const searchParams = useSearchParams();
   const [clientSecret, setClientSecret] = useState('');
   const [orderId, setOrderId] = useState('');
   const [orderNumber, setOrderNumber] = useState('');

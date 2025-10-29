@@ -15,9 +15,26 @@ export default function OrderConfirmationClient() {
   const [order, setOrder] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  const fetchOrderDetails = async () => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setOrder(data);
+        setStatus('success');
+      } else {
+        setStatus('error');
+        setErrorMessage(data.error || 'Failed to load order details');
+      }
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      setStatus('error');
+      setErrorMessage('Failed to load order details');
+    }
+  };
+
   useEffect(() => {
-    const paymentIntent = searchParams.get('payment_intent');
-    const paymentIntentClientSecret = searchParams.get('payment_intent_client_secret');
     const redirectStatus = searchParams.get('redirect_status');
 
     if (redirectStatus === 'succeeded') {
@@ -36,26 +53,8 @@ export default function OrderConfirmationClient() {
       setStatus('error');
       setErrorMessage('Invalid payment status.');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, orderId]);
-
-  const fetchOrderDetails = async () => {
-    try {
-      const response = await fetch(`/api/orders/${orderId}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setOrder(data);
-        setStatus('success');
-      } else {
-        setStatus('error');
-        setErrorMessage(data.error || 'Failed to load order details');
-      }
-    } catch (err) {
-      console.error('Error fetching order:', err);
-      setStatus('error');
-      setErrorMessage('Failed to load order details');
-    }
-  };
 
   if (status === 'loading') {
     return (
@@ -116,7 +115,7 @@ export default function OrderConfirmationClient() {
               Payment Successful!
             </h1>
             <p className="text-gray-600">
-              Thank you for your order. We've sent a confirmation email to{' '}
+              Thank you for your order. We&apos;ve sent a confirmation email to{' '}
               <span className="font-semibold">{order?.customerEmail}</span>
             </p>
           </div>
@@ -228,7 +227,7 @@ export default function OrderConfirmationClient() {
             <ul className="space-y-2 text-sm text-blue-800">
               <li className="flex items-start">
                 <span className="mr-2">📧</span>
-                <span>You'll receive an order confirmation email shortly</span>
+                <span>You&apos;ll receive an order confirmation email shortly</span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">👨‍🎨</span>
@@ -236,7 +235,7 @@ export default function OrderConfirmationClient() {
               </li>
               <li className="flex items-start">
                 <span className="mr-2">📦</span>
-                <span>You'll be notified when your order is ready</span>
+                <span>You&apos;ll be notified when your order is ready</span>
               </li>
             </ul>
           </div>
