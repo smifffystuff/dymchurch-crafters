@@ -1,11 +1,9 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function DashboardSetupPage() {
-  const { user } = useUser();
   const router = useRouter();
   const [formData, setFormData] = useState({
     businessName: '',

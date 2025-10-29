@@ -1,13 +1,11 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
-  const router = useRouter();
   const [crafterProfile, setCrafterProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
